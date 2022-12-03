@@ -1,12 +1,14 @@
-FROM ruby:2.7.1-alpine
+FROM ruby:3.1.2
 
-RUN mkdir -p /app
-WORKDIR /app
+RUN apt-get update -qq && apt-get install -y nodejs postgresql-client && rm -rf /var/cache/apk/*
 
-RUN apk --update --upgrade add git postgresql-dev imagemagick build-base xz-dev libc6-compat tzdata \
-    nodejs yarn vips \
-    curl unzip \
-    linux-headers \
-    && rm -rf /var/cache/apk/*
+WORKDIR /lightshot_parser_rails
+COPY . ./
 
+RUN bundle install
+
+RUN chmod +x /usr/bin/entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
 EXPOSE 3000
+
+CMD ["rails", "server", "-b", "0.0.0.0"]
